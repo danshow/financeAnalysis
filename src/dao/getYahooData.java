@@ -22,9 +22,9 @@ public class getYahooData {
 	
 	public static void main(String argv[]) throws Exception { 
 		
-		//getFirstData("0001.hk");
+		getFirstData("0001.hk");
 		//getBatchData(1,1);	
-		getBatchData(30,40);
+		getBatchData(2,3);
 	}
 	
 	public static void getAlterData(String stockName)throws Exception{
@@ -33,8 +33,11 @@ public class getYahooData {
 		URL url = new URL(urlInfo);        
 		BufferedReader in= new BufferedReader(new InputStreamReader(url.openStream()));   
 		String newLine=in.readLine(); //获取标题
+		if(newLine==null)
+			return ;
 		System.out.println(newLine);
-				
+		System.out.println(stockName);	
+		
 		String addStockameToMySQL="Alter table timeseriesplotter_close add `"+stockName+"` TINYTEXT;";
 		DBTransaction.executeUpdate(addStockameToMySQL);
 		while((newLine=in.readLine())!=null){
@@ -48,10 +51,16 @@ public class getYahooData {
 			volume=stock[5];
 			
 			String sqlclose="UPDATE timeseriesplotter_close set `"+stockName+"`="+close+" where `Date`='"+stock[0]+"';";//update close data
-			//String sqlhigh="insert into timeseriesplotter_high(Date,`"+stockName+"`) values ('"+date+"','"+high+"')";//insert high data
-			//String sqlvolume="insert into timeseriesplotter_volume(Date,`"+stockName+"`) values ('"+date+"','"+volume+"')";//insert high data
+			String sqlopen="UPDATE timeseriesplotter_close set `"+stockName+"`="+close+" where `Date`='"+stock[1]+"';";//update close data
+			String sqllow="UPDATE timeseriesplotter_close set `"+stockName+"`="+close+" where `Date`='"+stock[3]+"';";//update close data
+			String sqlhigh="insert into timeseriesplotter_high(Date,`"+stockName+"`) values ('"+date+"','"+stock[2]+"')";//insert high data
+			String sqlvolume="insert into timeseriesplotter_volume(Date,`"+stockName+"`) values ('"+date+"','"+stock[5]+"')";//insert high data
 			
 			DBTransaction.executeUpdate(sqlclose);
+			DBTransaction.executeUpdate(sqlopen);
+			DBTransaction.executeUpdate(sqllow);
+			DBTransaction.executeUpdate(sqlhigh);
+			DBTransaction.executeUpdate(sqlvolume);
 			
 		
 		
@@ -70,6 +79,7 @@ public class getYahooData {
 		BufferedReader in= new BufferedReader(new InputStreamReader(url.openStream()));   
 		String newLine=in.readLine(); //获取标题
 		System.out.println(newLine);
+		
 				
 		newLine=in.readLine();//对应字段（日期，开盘价，最高，最低，收盘，交易量，调整收盘)
 		
@@ -86,10 +96,16 @@ public class getYahooData {
 			String sqlclose="insert into timeseriesplotter_close(Date,`"+stockName+"`) values ('"+date+"','"+close+"')";//insert close data
 			String sqlhigh="insert into timeseriesplotter_high(Date,`"+stockName+"`) values ('"+date+"','"+high+"')";//insert high data
 			String sqlvolume="insert into timeseriesplotter_volume(Date,`"+stockName+"`) values ('"+date+"','"+volume+"')";//insert high data
+			String sqllow="insert into timeseriesplotter_volume(Date,`"+stockName+"`) values ('"+date+"','"+low+"')";//insert high data
+			String sqlopen="insert into timeseriesplotter_volume(Date,`"+stockName+"`) values ('"+date+"','"+open+"')";//insert high data
+			
 			
 			DBTransaction.executeUpdate(sqlclose);
 			DBTransaction.executeUpdate(sqlhigh);
 			DBTransaction.executeUpdate(sqlvolume);
+			DBTransaction.executeUpdate(sqllow);
+			DBTransaction.executeUpdate(sqlopen);
+			
 		
 		}
 		
